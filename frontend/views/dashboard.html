@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="/function/js/main.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h2>User Dashboard</h2>
+    <div id="user-info"></div>
+
+    <script id="user-template" type="text/x-handlebars-template">
+        <h3>Welcome, {{name}}!</h3>
+        <p><strong>Email:</strong> {{email}}</p>
+        <p><strong>Role:</strong> {{role}}</p>
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Get token from localStorage
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                window.location.href = '/egspec/portal/login'; // Redirect to login if token is not present
+                return;
+            }
+
+            // Fetch user info from dashboard route
+            const response = await fetch('/api/dashboard', {
+                method: 'GET',
+                headers: {
+                    'Authorization': token // Send token in the headers
+                }
+            });
+
+            if (!response.ok) {
+                window.location.href = '/egspec/portal/login'; // Redirect to login if user data fetch fails
+                return;
+            }
+
+            const user = await response.json();
+
+            // Prepare the Handlebars template
+            const source = document.getElementById('user-template').innerHTML;
+            const template = Handlebars.compile(source);
+            const html = template(user); // Pass user data to template
+
+            // Insert the compiled HTML into the user info div
+            document.getElementById('user-info').innerHTML = html;
+        });
+    </script>
+</body>
+</html>
